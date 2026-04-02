@@ -1,0 +1,11 @@
+client_name,account_id,pipeline_value,deal_stage,growth_target
+Visa,A001,5000000,Negotiation,15
+Mastercard,B001,3000000,Proposal,10
+HSBC,C001,8000000,Closed Won,12
+Barclays,D001,2000000,Prospecting,8
+Deutsche Bank,E001,6000000,Negotiation,18
+NatWest,F001,1500000,Proposal,10
+Lloyds,G001,4000000,Closed Won,20
+Santander,H001,3500000,Negotiation,14
+Standard Chartered,I001,7000000,Proposal,16
+RBS,J001,2500000,Prospecting,9

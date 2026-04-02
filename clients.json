@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Square",
+        "revenue": 89000000,
+        "risk": "Low"
+    },
+    {
+        "name": "FIS",
+        "revenue": 71000000,
+        "risk": "Medium"
+    },
+    {
+        "name": "Adyen",
+        "revenue": 64000000,
+        "risk": "Low"
+    },
+    {
+        "name": "Worldline",
+        "revenue": 45000000,
+        "risk": "High"
+    }
+]
