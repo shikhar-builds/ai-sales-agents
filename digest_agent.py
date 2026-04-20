@@ -1,3 +1,8 @@
+import csv
+import pandas as pd
+from datetime import datetime, date
+from export_pdf import export_digest_to_pdf
+
 """
 digest_agent.py
 ---------------
@@ -9,9 +14,6 @@ Sources:
     - revenue.csv     → revenue and growth %
     - last_contact.csv → last contact date
 """
-
-import csv
-from datetime import datetime, date
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -86,53 +88,64 @@ def needs_followup(clients, days=FOLLOW_UP_DAYS):
 
 # ── Display ───────────────────────────────────────────────────────────────────
 
-def print_digest(clients):
-    today = date.today().strftime("%A, %d %B %Y")
+def print_digest(top, pipeline, followups, today_str):
+    width = 60
+    print("\n" + "=" * width)
+    print(f"  📋  DAILY CLIENT DIGEST — {today_str}")
+    print("=" * width)
 
-    print("\n" + "=" * 60)
-    print(f"  📋  DAILY CLIENT DIGEST — {today}")
-    print("=" * 60)
+    print("  📈  TOP 3 CLIENTS BY REVENUE")
+    print("  " + "-" * (width - 2))
+    for i, c in enumerate(top, 1):
+        growth_icon = "🔴" if c["growth_pct"] < 0 else "🟢"
+        print(f"  #{i} {c['name']:<22} £ {c['revenue']:>15,.0f}  {growth_icon} {c['growth_pct']:.1f}% growth")
 
-    # Section 1 — Top clients by revenue
-    print("\n  📈  TOP 3 CLIENTS BY REVENUE")
-    print("  " + "-" * 56)
-    for i, c in enumerate(top_by_revenue(clients), 1):
-        growth_flag = "🟢" if c["growth_pct"] >= c["growth_target"] else "🔴"
-        print(f"  #{i} {c['name']:<22} £{c['revenue']:>15,.0f}  {growth_flag} {c['growth_pct']}% growth")
-
-    # Section 2 — Open pipeline
     print("\n  🔄  OPEN PIPELINE OPPORTUNITIES")
-    print("  " + "-" * 56)
-    pipeline = open_pipeline(clients)
-    for c in sorted(pipeline, key=lambda x: x["pipeline_value"], reverse=True):
-        print(f"  {c['name']:<24} £{c['pipeline_value']:>10,.0f}  [{c['deal_stage']}]")
+    print("  " + "-" * (width - 2))
+    for c in pipeline:
+        print(f"  {c['name']:<24} £ {c['pipeline_value']:>9,.0f}  [{c['deal_stage']}]")
 
-    # Section 3 — Follow ups
-    print(f"\n  📞  FOLLOW UPS NEEDED (no contact in {FOLLOW_UP_DAYS}+ days)")
-    print("  " + "-" * 56)
-    overdue = needs_followup(clients)
-    if overdue:
-        for c in overdue:
-            print(f"  {c['name']:<24} Last contact: {c['last_contact']}  ({c['days_since']} days ago)")
-    else:
-        print("  ✅  All clients contacted recently!")
+    print("\n  📞  FOLLOW UPS NEEDED (no contact in 7+ days)")
+    print("  " + "-" * (width - 2))
+    for c in followups:
+        print(f"  {c['name']:<24} Last contact: {c['last_contact']}  ({c['days_since']} days ago)")
 
-    print("\n" + "=" * 60 + "\n")
+    print("=" * width)
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Run ───────────────────────────────────────────────────────────────────────
 
-def main():
-    print("Loading data...")
-    clients  = load_csv(CLIENTS_FILE)
-    revenues = load_csv(REVENUE_FILE)
-    contacts = load_csv(LAST_CONTACT_FILE)
+base = "/Users/shikhar/Documents/Projects/StartupProjects/Code/Python/"
 
-    print("Merging sources...")
-    merged = merge_data(clients, revenues, contacts)
+print("Loading data...")
+clients  = load_csv(base + "clients.csv")
+revenues = load_csv(base + "revenue.csv")
+contacts = load_csv(base + "last_contact.csv")
 
-    print_digest(merged)
+print("Merging sources...")
+merged = merge_data(clients, revenues, contacts)
 
+today_str = datetime.today().strftime("%A, %d %B %Y")
+top       = top_by_revenue(merged)
+pipeline  = open_pipeline(merged)
+followups = needs_followup(merged)
 
-if __name__ == "__main__":
-    main()
+# Print to terminal
+print_digest(top, pipeline, followups, today_str)
+
+# Build PDF-ready data
+top_clients_pdf = [
+    {"name": c["name"], "revenue": c["revenue"], "growth": c["growth_pct"]}
+    for c in top
+]
+pipeline_pdf = [
+    {"client": c["name"], "value": c["pipeline_value"], "stage": c["deal_stage"]}
+    for c in pipeline
+]
+followups_pdf = [
+    {"client": c["name"], "last_contact": c["last_contact"], "days_ago": c["days_since"]}
+    for c in followups
+]
+
+# Export to PDF
+export_digest_to_pdf(top_clients_pdf, pipeline_pdf, followups_pdf)  
