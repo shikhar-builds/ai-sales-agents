@@ -22,7 +22,7 @@ SEND_TO        = "shikhar.srivastava1601@gmail.com"      # ← who receives it (
 
 # ── Sender ────────────────────────────────────────────────────────────────────
 
-def send_digest_email(pdf_path):
+def send_digest_email(pdf_path, summary=""):
     """Attach PDF and send via Gmail SMTP."""
 
     if not os.path.exists(pdf_path):
@@ -37,10 +37,12 @@ def send_digest_email(pdf_path):
     msg["To"]      = SEND_TO
     msg["Subject"] = f"Daily Client Digest — {today_str}"
 
-    # Body
+  # Body
+    summary_block = f"AI Executive Summary:\n{summary}\n\n" if summary else ""
+
     body = f"""Hi,
 
-Please find attached your Daily Client Digest for {today_str}.
+{summary_block}Please find attached your Daily Client Digest for {today_str}.
 
 This report includes:
   • Top 3 clients by revenue

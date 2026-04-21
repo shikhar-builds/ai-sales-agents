@@ -148,7 +148,26 @@ followups_pdf = [
 ]
 
 # Export to PDF
-export_digest_to_pdf(top_clients_pdf, pipeline_pdf, followups_pdf)  
+summary = (
+    "Call NatWest today - 42 days without contact with £1.5M in Proposal stage "
+    "is a deal at serious risk of going cold. Your biggest pipeline opportunity is "
+    "Standard Chartered at £7M in Proposal - get a review meeting in the diary this "
+    "week. The relationship most at risk beyond NatWest is Barclays at 37 days silent, "
+    "with only £2M in Prospecting stage."
+)
+export_digest_to_pdf(top_clients_pdf, pipeline_pdf, followups_pdf, summary=summary)  
 
 from send_email import send_digest_email
-send_digest_email(f"digest_{datetime.today().strftime('%Y%m%d')}.pdf")
+send_digest_email(f"digest_{datetime.today().strftime('%Y%m%d')}.pdf", summary=summary)
+
+# AI Executive Summary — paste Claude's output here each morning
+summary = (
+    "Call NatWest today — 42 days without contact with £1.5M in Proposal stage "
+    "is a deal at serious risk of going cold. Your biggest pipeline opportunity is "
+    "Standard Chartered at £7M in Proposal — get a review meeting in the diary this "
+    "week. The relationship most at risk beyond NatWest is Barclays at 37 days silent, "
+    "with only £2M in Prospecting stage."
+)
+
+export_digest_to_pdf(top_clients_pdf, pipeline_pdf, followups_pdf, summary=summary)
+send_digest_email(f"digest_{datetime.today().strftime('%Y%m%d')}.pdf", summary=summary)
