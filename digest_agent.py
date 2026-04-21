@@ -149,3 +149,6 @@ followups_pdf = [
 
 # Export to PDF
 export_digest_to_pdf(top_clients_pdf, pipeline_pdf, followups_pdf)  
+
+from send_email import send_digest_email
+send_digest_email(f"digest_{datetime.today().strftime('%Y%m%d')}.pdf")
