@@ -73,3 +73,46 @@ Generated automatically by digest_agent.py
         print(f"✅ Email sent to {SEND_TO}")
     except Exception as e:
         print(f"❌ Email failed: {e}")
+
+def send_prep_email(pdf_path, client_name, summary=""):
+    """Send meeting prep PDF as a separate email."""
+
+    if not os.path.exists(pdf_path):
+        print(f"❌ Prep PDF not found: {pdf_path}")
+        return
+
+    today_str = datetime.today().strftime("%A, %d %B %Y")
+
+    msg = MIMEMultipart()
+    msg["From"]    = GMAIL_ADDRESS
+    msg["To"]      = SEND_TO
+    msg["Subject"] = f"Meeting Prep — {client_name} — {today_str}"
+
+    summary_block = f"Talking Points:\n{summary}\n\n" if summary else ""
+
+    body = f"""Hi,
+
+{summary_block}Please find attached your Meeting Prep sheet for {client_name}.
+
+Generated automatically by morning_briefing.py
+
+"""
+    msg.attach(MIMEText(body, "plain"))
+
+    with open(pdf_path, "rb") as f:
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header(
+            "Content-Disposition",
+            f"attachment; filename={os.path.basename(pdf_path)}"
+        )
+        msg.attach(part)
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(GMAIL_ADDRESS, APP_PASSWORD)
+            server.sendmail(GMAIL_ADDRESS, SEND_TO, msg.as_string())
+        print(f"✅ Prep email sent to {SEND_TO}")
+    except Exception as e:
+        print(f"❌ Prep email failed: {e}")
