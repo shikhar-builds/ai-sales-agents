@@ -21,17 +21,17 @@ def export_digest_to_pdf(top_clients, pipeline, followups, date_str=None, summar
     pdf.set_margins(20, 20, 20)
     pdf.set_auto_page_break(auto=True, margin=20)
 
-    # ── HEADER ──────────────────────────────────────────
+# ── HEADER ──────────────────────────────────────────
     pdf.set_fill_color(30, 158, 117)
-    pdf.rect(0, 0, 210, 28, style="F")
+    pdf.rect(0, 0, 210, 36, style="F")
     pdf.set_font("Arial", "B", 16)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_y(8)
-    pdf.cell(0, 12, "Daily Client Digest", align="C")
-    pdf.ln(5)
+    pdf.set_y(10)
+    pdf.cell(0, 10, "Daily Client Digest", align="C")
+    pdf.ln(4)
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 6, date_str, align="C")
-    pdf.ln(16)
+    pdf.ln(20)
 
     # ── EXECUTIVE SUMMARY ────────────────────────────────
     if summary:
@@ -124,17 +124,17 @@ def export_prep_pdf(client, talking_points, date_str=None):
     pdf.set_margins(20, 20, 20)
     pdf.set_auto_page_break(auto=True, margin=20)
 
-    # ── HEADER ──────────────────────────────────────────
+# ── HEADER ──────────────────────────────────────────
     pdf.set_fill_color(30, 158, 117)
-    pdf.rect(0, 0, 210, 28, style="F")
+    pdf.rect(0, 0, 210, 36, style="F")
     pdf.set_font("Arial", "B", 16)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_y(8)
-    pdf.cell(0, 12, f"Meeting Prep - {client['name']}", align="C")
-    pdf.ln(5)
+    pdf.set_y(10)
+    pdf.cell(0, 10, f"Meeting Prep - {client['name']}", align="C")
+    pdf.ln(4)
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 6, date_str, align="C")
-    pdf.ln(16)
+    pdf.ln(20)
 
     # ── CLIENT SNAPSHOT ──────────────────────────────────
     pdf.set_font("Arial", "B", 11)
