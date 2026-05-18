@@ -206,15 +206,16 @@ def export_intel_pdf(competitor, context, intel_output, date_str=None):
 
     # ── HEADER ──────────────────────────────────────────
     pdf.set_fill_color(30, 158, 117)
-    pdf.rect(0, 0, 210, 36, style="F")
-    pdf.set_font("Arial", "B", 16)
+    pdf.rect(0, 0, 210, 45, style="F")
     pdf.set_text_color(255, 255, 255)
-    pdf.set_y(10)
-    pdf.cell(0, 10, "Competitive Intelligence Report", align="C")
-    pdf.ln(4)
+    pdf.set_font("Arial", "B", 16)
+    pdf.set_xy(0, 12)
+    pdf.cell(w=210, h=10, txt="Competitive Intelligence Report", border=0, ln=1, align="C")
     pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, f"{competitor}  |  {date_str}", align="C")
-    pdf.ln(12)
+    pdf.set_x(0)
+    pdf.cell(w=210, h=8, txt=f"{competitor}  |  {date_str}", border=0, ln=1, align="C")
+    pdf.set_y(50)
+    pdf.set_text_color(40, 40, 40)
 
     # ── CONTEXT BADGE ────────────────────────────────────
     ctx_label = "Payments / KAM Context" if context == "payments" else "Startup Context"
