@@ -17,3 +17,7 @@ talking_points.txt
 
 # Credentials
 send_email.py
+
+# Mac system files
+.DS_Store
+screenshots/.DS_Store
