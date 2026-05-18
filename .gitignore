@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated PDFs
+digest_*.pdf
+intel_*.pdf
+prep_*.pdf
+test_*.pdf
+
+# Temp prompt files
+brain_prompt_*.txt
+intel_prompt_*.txt
+competitor_input.txt
+intel_output_*.txt
+talking_points.txt
