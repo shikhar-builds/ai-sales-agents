@@ -78,6 +78,8 @@ python3 morning_briefing.py
 ```
 
 ### Competitive Intel Report (6 sections)
+
+![Competitive Intelligence Report](screenshots/intel_sample.png)
 - Company Snapshot
 - Positioning & Messaging
 - Strengths
