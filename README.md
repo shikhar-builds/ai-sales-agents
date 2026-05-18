@@ -40,6 +40,8 @@ python3 morning_briefing.py
 ## Sample outputs
 
 ### Daily Client Digest
+
+![Daily Client Digest](screenshots/digest_sample.png)
 ```
 ============================================================
   📋  DAILY CLIENT DIGEST — Monday, 18 May 2026
