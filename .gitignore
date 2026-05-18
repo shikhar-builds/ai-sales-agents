@@ -14,3 +14,6 @@ intel_prompt_*.txt
 competitor_input.txt
 intel_output_*.txt
 talking_points.txt
+
+# Credentials
+send_email.py
