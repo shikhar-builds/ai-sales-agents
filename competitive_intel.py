@@ -10,6 +10,7 @@ import os
 import sys
 import requests
 from datetime import datetime
+from export_pdf import export_intel_pdf
 
 BASE = "/Users/shikhar/Documents/Projects/StartupProjects/Code/Python/"
 
@@ -206,10 +207,15 @@ with open(output_file, "r") as f:
 os.remove(output_file)
 
 print(f"\n  ✅ Intel captured for {competitor}")
-print(f"  📄 PDF export coming in Day 2...\n")
+print(f"  📄 Generating PDF report...")
+
+# Export to PDF
+print(f"\n  DEBUG: intel_output length = {len(intel_output)} characters")
+print(f"  DEBUG: first 300 chars:\n{intel_output[:300]}")
+export_intel_pdf(competitor, context, intel_output)
 
 # Commit reminder
-print("  💾  Don't forget to commit:")
-print(f"     git add competitive_intel.py")
-print(f"     git commit -m 'feat: competitive intelligence tool — input handler + prompt builder'")
+print("\n  💾  Commit when done:")
+print(f"     git add competitive_intel.py export_pdf.py")
+print(f"     git commit -m 'feat: competitive intel PDF export'")
 print("=" * 60)

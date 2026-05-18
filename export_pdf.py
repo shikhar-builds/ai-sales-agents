@@ -186,3 +186,104 @@ def export_prep_pdf(client, talking_points, date_str=None):
     pdf.output(filename)
     print(f"\n✅ Prep PDF exported: {filename}")
     return filename
+
+def export_intel_pdf(competitor, context, intel_output, date_str=None):
+    """Export competitive intelligence report to PDF."""
+    if date_str is None:
+        date_str = datetime.today().strftime("%A, %d %B %Y")
+
+    filename = f"intel_{competitor.replace(' ', '_')}_{datetime.today().strftime('%Y%m%d')}.pdf"
+
+    pdf = FPDF()
+    pdf.add_font("Arial", "",  FONT_REGULAR, uni=True)
+    pdf.add_font("Arial", "B", FONT_BOLD,    uni=True)
+    pdf.add_font("Arial", "I", FONT_ITALIC,  uni=True)
+    pdf.add_page()
+    pdf.set_margins(20, 20, 20)
+    pdf.set_auto_page_break(auto=True, margin=20)
+
+    # ── HEADER ──────────────────────────────────────────
+    pdf.set_fill_color(30, 158, 117)
+    pdf.rect(0, 0, 210, 36, style="F")
+    pdf.set_font("Arial", "B", 16)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_y(10)
+    pdf.cell(0, 10, "Competitive Intelligence Report", align="C")
+    pdf.ln(4)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(0, 6, f"{competitor}  |  {date_str}", align="C")
+    pdf.ln(12)
+
+    # ── CONTEXT BADGE ────────────────────────────────────
+    ctx_label = "Payments / KAM Context" if context == "payments" else "Startup Context"
+    pdf.set_font("Arial", "I", 9)
+    pdf.set_text_color(100, 100, 100)
+    pdf.set_x(20)
+    pdf.multi_cell(170, 6, f"Prepared for: Worldline KAM  |  Context: {ctx_label}  |  Classification: Internal Use Only", align="C")
+    pdf.ln(6)
+    pdf.set_text_color(40, 40, 40)
+
+    # ── CONTENT LOOP ─────────────────────────────────────
+    for line in intel_output.split("\n"):
+        line = line.strip()
+
+        # Skip empty lines — just add small spacing
+        if not line:
+            pdf.ln(1)
+            continue
+
+        # Clean markdown hashes
+        clean = line.lstrip("#").strip()
+
+        # Section headers — numbered like "1. COMPANY SNAPSHOT" or all-caps
+        is_numbered = clean and clean[0].isdigit() and "." in clean[:3]
+        is_allcaps = clean.upper() == clean and len(clean) > 6 and not clean.startswith("-")
+
+        if is_numbered or is_allcaps:
+            pdf.ln(4)
+            pdf.set_x(20)
+            pdf.set_font("Arial", "B", 11)
+            pdf.set_text_color(30, 158, 117)
+            pdf.multi_cell(170, 8, clean)
+            pdf.set_draw_color(30, 158, 117)
+            pdf.set_line_width(0.4)
+            pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+            pdf.ln(3)
+            pdf.set_text_color(40, 40, 40)
+
+        # Bold sub-headers **like this**
+        elif line.startswith("**") and line.endswith("**"):
+            pdf.ln(2)
+            pdf.set_x(20)
+            pdf.set_font("Arial", "B", 10)
+            pdf.set_text_color(40, 40, 40)
+            text = line.replace("**", "").strip()
+            pdf.multi_cell(170, 7, text)
+
+        # Bullet points
+        elif line.startswith("-") or line.startswith("•"):
+            text = line.lstrip("-•").strip().replace("**", "")
+            pdf.set_x(20)
+            pdf.set_font("Arial", "", 9)
+            pdf.set_text_color(40, 40, 40)
+            pdf.multi_cell(170, 6, f"• {text}")
+
+        # Regular text
+        else:
+            clean_line = line.replace("**", "").strip()
+            if clean_line:
+                pdf.set_x(20)
+                pdf.set_font("Arial", "", 9)
+                pdf.set_text_color(40, 40, 40)
+                pdf.multi_cell(170, 6, clean_line)
+
+    # ── FOOTER ────────────────────────────────────────────
+    pdf.set_y(-20)
+    pdf.set_font("Arial", "I", 8)
+    pdf.set_text_color(150, 150, 150)
+    pdf.set_x(20)
+    pdf.multi_cell(170, 6, f"Generated {datetime.today().strftime('%d %b %Y %H:%M')}  |  Confidential  |  Worldline Internal", align="C")
+
+    pdf.output(filename)
+    print(f"\n✅ Intel PDF exported: {filename}")
+    return filename
