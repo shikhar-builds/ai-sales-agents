@@ -1,0 +1,197 @@
+You are a senior sales strategist briefing a Key Account Manager at a FinTech company.
+
+Today's date: Monday, 18 May 2026
+
+--- LIVE CLIENT DATA (from CRM) ---
+Top 3 clients by revenue:
+- Visa: £120,000,000 (+12.0% growth)
+- Mastercard: £95,000,000 (+8.0% growth)
+- HSBC: £80,000,000 (+15.0% growth)
+
+Open pipeline:
+- Visa: £5,000,000 [Negotiation]
+- Mastercard: £3,000,000 [Proposal]
+- Barclays: £2,000,000 [Prospecting]
+- Deutsche Bank: £6,000,000 [Negotiation]
+- NatWest: £1,500,000 [Proposal]
+- Santander: £3,500,000 [Negotiation]
+- Standard Chartered: £7,000,000 [Proposal]
+- RBS: £2,500,000 [Prospecting]
+
+Follow-ups needed (7+ days):s
+- NatWest: 69 days since last contact
+- Barclays: 64 days since last contact
+- Standard Chartered: 61 days since last contact
+- Mastercard: 59 days since last contact
+- Santander: 54 days since last contact
+- RBS: 52 days since last contact
+- Visa: 51 days since last contact
+- Lloyds: 50 days since last contact
+- Deutsche Bank: 49 days since last contact
+- HSBC: 47 days since last contact
+
+--- OBSIDIAN CLIENT NOTES ---
+
+### Mastercard
+# Mastercard
+
+## Snapshot
+- **Revenue:** £95,000,000
+- **Pipeline:** £3,000,000
+- **Deal Stage:** Proposal
+- **Last Contact:** 2026-03-20
+- **Growth Target:** 8%
+
+## Relationship Notes
+- Key contacts:
+- Preferred communication style:
+- Political landscape (who's the real decision maker):
+
+## Meeting History
+### 2026-05-18
+- **Attendees:** 
+- **Key points discussed:** 
+- **Commitments made:** 
+- **Next steps:** 
+
+## Opportunities
+- 
+
+## Risks & Watch Points
+- 
+
+## AI Talking Points (from meeting_prep.py)
+-
+
+### Visa
+# Visa
+
+## Snapshot
+- **Revenue:** £120,000,000
+- **Pipeline:** £5,000,000
+- **Deal Stage:** Negotiation
+- **Last Contact:** 2026-03-28
+- **Growth Target:** 15%
+
+## Relationship Notes
+- Key contacts:
+- Preferred communication style:
+- Political landscape (who's the real decision maker):
+
+## Meeting History
+### 2026-05-18
+- **Attendees:** 
+- **Key points discussed:** 
+- **Commitments made:** 
+- **Next steps:** 
+
+## Opportunities
+- 
+
+## Risks & Watch Points
+- 
+
+## AI Talking Points (from meeting_prep.py)
+-
+
+### Standard Chartered
+# Standard Chartered
+
+## Snapshot
+- **Revenue:** £73,000,000
+- **Pipeline:** £7,000,000
+- **Deal Stage:** Proposal
+- **Last Contact:** 2026-03-118
+- **Growth Target:** 16%
+
+## Relationship Notes
+- Key contacts:
+- Preferred communication style:
+- Political landscape (who's the real decision maker):
+
+## Meeting History
+### 2026-05-18
+- **Attendees:** 
+- **Key points discussed:** 
+- **Commitments made:** 
+- **Next steps:** 
+
+## Opportunities
+- 
+
+## Risks & Watch Points
+- 
+
+## AI Talking Points (from meeting_prep.py)
+-
+
+
+--- TODAY'S DAILY NOTE ---
+# Daily Note — 2026-05-18
+
+## Morning Priorities
+1. - Follow up with Standard Chartered — 34 days silent on £7M deal
+2. Send revised proposal to Mastercard
+3. Run morning briefing and review full portfolio digest
+## Client Actions Today
+- - Email Standard Chartered with integration roadmap
+- Call David Chen at Mastercard to chase proposal status
+- Schedule Q2 business review with Visa
+
+## Startup Actions Today
+- 
+
+## What I Learned Today
+- Built Obsidian vault and connected it to Python AI brain
+- Completed competitive intel report on Adyen — counter-moves ready for next competitive deal
+- Obsidian daily notes now part of morning routine
+
+## Blockers
+- 
+
+## AI Digest Summary (paste from morning_briefing.py)
+
+============================================================
+  📋  DAILY CLIENT DIGEST — Monday, 18 May 2026
+============================================================
+  📈  TOP 3 CLIENTS BY REVENUE
+  ----------------------------------------------------------
+  #1 Visa                   £     120,000,000  🟢 12.0% growth
+  #2 Mastercard             £      95,000,000  🟢 8.0% growth
+  #3 HSBC                   £      80,000,000  🟢 15.0% growth
+
+  🔄  OPEN PIPELINE OPPORTUNITIES
+  ----------------------------------------------------------
+  Visa                     £ 5,000,000  [Negotiation]
+  Mastercard               £ 3,000,000  [Proposal]
+  Barclays                 £ 2,000,000  [Prospecting]
+  Deutsche Bank            £ 6,000,000  [Negotiation]
+  NatWest                  £ 1,500,000  [Proposal]
+  Santander                £ 3,500,000  [Negotiation]
+  Standard Chartered       £ 7,000,000  [Proposal]
+  RBS                      £ 2,500,000  [Prospecting]
+
+  📞  FOLLOW UPS NEEDED (no contact in 7+ days)
+  ----------------------------------------------------------
+  NatWest                  Last contact: 2026-03-10  (69 days ago)
+  Barclays                 Last contact: 2026-03-15  (64 days ago)
+  Standard Chartered       Last contact: 2026-03-18  (61 days ago)
+  Mastercard               Last contact: 2026-03-20  (59 days ago)
+  Santander                Last contact: 2026-03-25  (54 days ago)
+  RBS                      Last contact: 2026-03-27  (52 days ago)
+  Visa                     Last contact: 2026-03-28  (51 days ago)
+  Lloyds                   Last contact: 2026-03-29  (50 days ago)
+  Deutsche Bank            Last contact: 2026-03-30  (49 days ago)
+  HSBC                     Last contact: 2026-04-01  (47 days ago)
+============================================================
+## Tomorrow's Focus
+-
+
+--- YOUR TASK ---
+Write a sharp 3-sentence executive summary that:
+- Identifies the single most urgent action today (use both CRM data AND personal notes)
+- Highlights the biggest pipeline opportunity
+- Flags the relationship most at risk
+
+Then add 3 bullet point actions for today based on everything above.
+Be direct. No fluff. Write as if speaking in a Monday morning standup.
