@@ -16,7 +16,44 @@ from send_email import send_digest_email, send_prep_email
 
 BASE = "/Users/shikhar/Documents/Projects/StartupProjects/Code/Python/"
 FOLLOW_UP_DAYS = 7
+BASE = "/Users/shikhar/Documents/Projects/StartupProjects/Code/Python/"
+FOLLOW_UP_DAYS = 7
 
+VAULT_PATH = "/Users/shikhar/Documents/Projects/AI_Brain/AI Brain/"
+
+def read_obsidian_context():
+    """Read today's daily note and client notes from Obsidian vault."""
+    from datetime import date
+    import os
+
+    context = {"daily_note": None, "client_notes": []}
+
+    # Today's daily note
+    today = date.today().strftime("%Y-%m-%d")
+    daily_path = os.path.join(VAULT_PATH, "Daily Notes", f"{today}.md")
+    if os.path.exists(daily_path):
+        with open(daily_path, "r", encoding="utf-8") as f:
+            context["daily_note"] = f.read().strip()
+        print("  ✅ Obsidian daily note loaded")
+    else:
+        print("  ⚠️  No Obsidian daily note found for today")
+
+    # Client notes
+    clients_path = os.path.join(VAULT_PATH, "Clients")
+    if os.path.exists(clients_path):
+        for filename in os.listdir(clients_path):
+            if filename.endswith(".md"):
+                filepath = os.path.join(clients_path, filename)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    content = f.read().strip()
+                if content:
+                    context["client_notes"].append({
+                        "title": filename.replace(".md", ""),
+                        "content": content[:1500]
+                    })
+        print(f"  ✅ {len(context['client_notes'])} Obsidian client notes loaded")
+
+    return context
 # ── Loaders ───────────────────────────────────────────────────────────────────
 
 def load_csv(filepath):
@@ -132,6 +169,9 @@ def print_prep(c):
 print("\n🌅  MORNING BRIEFING")
 print("=" * 60)
 
+# 0. Load Obsidian context
+obsidian = read_obsidian_context()
+
 # 1. Load and merge data
 print("\nLoading data...")
 clients  = load_csv(BASE + "clients.csv")
@@ -153,14 +193,69 @@ top_pdf      = [{"name": c["name"], "revenue": c["revenue"], "growth": c["growth
 pipeline_pdf = [{"client": c["name"], "value": c["pipeline_value"], "stage": c["deal_stage"]} for c in pipeline]
 followups_pdf= [{"client": c["name"], "last_contact": c["last_contact"], "days_ago": c["days_since"]} for c in followups]
 
-# 4. AI summary — paste today's Claude output here each morning
-summary = (
-    "Call NatWest today - 42 days without contact with £1.5M in Proposal stage "
-    "is a deal at serious risk of going cold. Your biggest pipeline opportunity is "
-    "Standard Chartered at £7M in Proposal - get a review meeting in the diary this "
-    "week. The relationship most at risk beyond NatWest is Barclays at 37 days silent, "
-    "with only £2M in Prospecting stage."
-)
+# 4. Build enriched Claude.ai prompt using Obsidian context
+print("\n  🧠  Building enriched AI prompt from Obsidian vault...")
+
+client_context = ""
+for note in obsidian["client_notes"]:
+    client_context += f"\n### {note['title']}\n{note['content']}\n"
+
+daily_context = obsidian["daily_note"] or "No daily note available."
+
+enriched_prompt = f"""You are a senior sales strategist briefing a Key Account Manager at a FinTech company.
+
+Today's date: {today_str}
+
+--- LIVE CLIENT DATA (from CRM) ---
+Top 3 clients by revenue:
+{chr(10).join([f"- {c['name']}: £{c['revenue']:,.0f} ({c['growth_pct']:+.1f}% growth)" for c in top])}
+
+Open pipeline:
+{chr(10).join([f"- {c['name']}: £{c['pipeline_value']:,.0f} [{c['deal_stage']}]" for c in pipeline])}
+
+Follow-ups needed (7+ days):
+{chr(10).join([f"- {c['name']}: {c['days_since']} days since last contact" for c in followups])}
+
+--- OBSIDIAN CLIENT NOTES ---
+{client_context}
+
+--- TODAY'S DAILY NOTE ---
+{daily_context}
+
+--- YOUR TASK ---
+Write a sharp 3-sentence executive summary that:
+- Identifies the single most urgent action today (use both CRM data AND personal notes)
+- Highlights the biggest pipeline opportunity
+- Flags the relationship most at risk
+
+Then add 3 bullet point actions for today based on everything above.
+Be direct. No fluff. Write as if speaking in a Monday morning standup.
+"""
+
+enriched_prompt_file = BASE + "morning_summary_prompt.txt"
+with open(enriched_prompt_file, "w") as f:
+    f.write(enriched_prompt)
+
+os.system(f"open '{enriched_prompt_file}'")
+print(f"  📋 Enriched prompt opened — paste into Claude.ai")
+input("\n  Press Enter when you have Claude's response ready... ")
+
+summary_file = BASE + "morning_summary.txt"
+with open(summary_file, "w") as f:
+    f.write("")
+os.system(f"open '{summary_file}'")
+input("  Press Enter when you've saved Claude's response... ")
+
+with open(summary_file, "r") as f:
+    summary = f.read().strip()
+
+if not summary:
+    summary = "No AI summary provided today."
+
+try:
+    os.remove(summary_file)
+except:
+    pass
 
 # 5. Export digest PDF and send email
 pdf_file = export_digest_to_pdf(top_pdf, pipeline_pdf, followups_pdf, summary=summary)
