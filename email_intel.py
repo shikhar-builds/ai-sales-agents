@@ -380,18 +380,30 @@ def parse_intelligence(raw_output):
     ]
     result = {}
     for section in sections:
-        pattern = rf"<{section}>(.*?)</{section}>"
-        match = re.search(pattern, raw_output, re.DOTALL)
+        # Allow optional whitespace inside closing tag to handle Claude formatting variations
+        pattern = rf"<{section}>(.*?)<\s*/{section}\s*>"
+        match = re.search(pattern, raw_output, re.DOTALL | re.IGNORECASE)
         result[section] = match.group(1).strip() if match else "Could not parse."
     return result
 
 # ── Terminal display ──────────────────────────────────────────────────────────
 
-def print_intelligence(client_name, intel, thread_count, email_count):
+def prompt_lookback():
+    """Ask user to choose email lookback window. Returns number of days."""
+    print("\n  📅  Email lookback window:")
+    print("       1) 7 days")
+    print("       2) 14 days")
+    print("       3) 30 days (default)")
+    print("       4) 90 days")
+    choice = input("       Choose [1-4] or Enter for 30 days: ").strip()
+    return {"1": 7, "2": 14, "3": 30, "4": 90}.get(choice, 30)
+
+
+def print_intelligence(client_name, intel, thread_count, email_count, days=LOOKBACK_DAYS):
     width = 65
     print("\n" + "=" * width)
     print(f"  🧠  EMAIL INTELLIGENCE — {client_name.upper()}")
-    print(f"  📬  {email_count} emails · {thread_count} threads · last {LOOKBACK_DAYS} days")
+    print(f"  📬  {email_count} emails · {thread_count} threads · last {days} days")
     print("=" * width)
 
     labels = {
@@ -413,7 +425,7 @@ def print_intelligence(client_name, intel, thread_count, email_count):
 
 # ── Markdown export ───────────────────────────────────────────────────────────
 
-def export_markdown(client_name, intel, thread_count, email_count):
+def export_markdown(client_name, intel, thread_count, email_count, days=LOOKBACK_DAYS):
     """Save intelligence as .md file for PDF/PPT conversion."""
     today = datetime.today().strftime("%Y%m%d")
     filename = BASE + f"email_intel_{client_name.replace(' ', '_')}_{today}.md"
@@ -430,7 +442,7 @@ def export_markdown(client_name, intel, thread_count, email_count):
     lines = [
         f"# Email Intelligence — {client_name}",
         f"**Generated:** {datetime.today().strftime('%A, %d %B %Y %H:%M')}",
-        f"**Source:** {email_count} emails · {thread_count} threads · last {LOOKBACK_DAYS} days",
+        f"**Source:** {email_count} emails · {thread_count} threads · last {days} days",
         "",
         "---",
         "",
@@ -460,9 +472,11 @@ def main():
     print("  📧  EMAIL INTELLIGENCE ENGINE")
     print("=" * width)
 
-    # 1. Get client name
-    if len(sys.argv) > 1:
-        client_name = " ".join(sys.argv[1:]).strip()
+    # 1. Get client name — always prompt interactively; CLI arg is the default if Enter is pressed
+    cli_arg = " ".join(sys.argv[1:]).strip() if len(sys.argv) > 1 else ""
+    if cli_arg:
+        user_input = input(f"\n  Client name [{cli_arg}]: ").strip()
+        client_name = user_input or cli_arg
     else:
         client_name = input("\n  Client name: ").strip()
 
@@ -471,7 +485,8 @@ def main():
         sys.exit(1)
 
     print(f"\n  🔍  Searching emails for: {client_name}")
-    print(f"  📅  Looking back: {LOOKBACK_DAYS} days\n")
+    days = prompt_lookback()
+    print(f"  📅  Looking back: {days} days\n")
 
     # 2. Load credentials
     app_password = get_env("GMAIL_APP_PASSWORD")
@@ -482,7 +497,7 @@ def main():
     mail = connect_gmail(app_password)
 
     print("  Fetching recent emails...")
-    all_emails = fetch_recent_emails(mail)
+    all_emails = fetch_recent_emails(mail, days=days)
     print(f"  ✅ {len(all_emails)} emails fetched")
 
     mail.logout()
@@ -492,7 +507,7 @@ def main():
     matched = match_emails(all_emails, client_name)
 
     if not matched:
-        print(f"\n  ⚠️  No emails matched for '{client_name}' in the last {LOOKBACK_DAYS} days.")
+        print(f"\n  ⚠️  No emails matched for '{client_name}' in the last {days} days.")
         print("  Signals checked: sender email · email signature · subject line")
         print("  Tip: Try a partial name e.g. 'Chartered' instead of 'Standard Chartered'\n")
         sys.exit(0)
@@ -526,10 +541,10 @@ def main():
 
     # 7. Parse and display
     intel = parse_intelligence(raw_output)
-    print_intelligence(client_name, intel, len(threads), len(matched))
+    print_intelligence(client_name, intel, len(threads), len(matched), days=days)
 
     # 8. Save markdown
-    md_file = export_markdown(client_name, intel, len(threads), len(matched))
+    md_file = export_markdown(client_name, intel, len(threads), len(matched), days=days)
 
     print(f"\n  ✅ Done. Next: open {md_file} to review or convert to PDF/PPT.")
     print("=" * width + "\n")

@@ -13,6 +13,16 @@ from datetime import datetime, date
 
 from export_pdf import export_digest_to_pdf, export_prep_pdf
 from send_email import send_digest_email, send_prep_email
+from email_intel import (
+    connect_gmail,
+    fetch_recent_emails,
+    match_emails,
+    group_into_threads,
+    build_extraction_prompt,
+    call_claude as email_intel_claude,
+    parse_intelligence,
+    prompt_lookback,
+)
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -252,8 +262,24 @@ def find_client(name, merged):
             return {**c, "days_since": days_since}
     return None
 
-def build_talking_points_prompt(c):
-    """Build talking points prompt with XML tags."""
+def build_talking_points_prompt(c, intel=None):
+    """Build talking points prompt with XML tags. Optionally enriched with email intel."""
+
+    intel_block = ""
+    if intel:
+        intel_block = f"""
+
+<email_intelligence>
+  <decisions_made>{intel.get('decisions_made', 'None identified.')}</decisions_made>
+  <open_actions>{intel.get('open_actions', 'None identified.')}</open_actions>
+  <pain_points>{intel.get('pain_points', 'None identified.')}</pain_points>
+  <relationship_risks>{intel.get('relationship_risks', 'None identified.')}</relationship_risks>
+  <upsell_signals>{intel.get('upsell_signals', 'None identified.')}</upsell_signals>
+  <relationship_temperature>{intel.get('relationship_temperature', 'Not available.')}</relationship_temperature>
+</email_intelligence>"""
+
+    enriched_note = " Ground talking points in both CRM data and email intelligence." if intel else ""
+
     prompt = f"""You are a senior sales strategist. I have a meeting with {c['name']}.
 
 <client_profile>
@@ -263,13 +289,13 @@ def build_talking_points_prompt(c):
   <pipeline>£{c['pipeline_value']:,.0f} in {c['deal_stage']} stage</pipeline>
   <last_contact>{c['last_contact']} ({c['days_since']} days ago)</last_contact>
   <growth_target>{c['growth_target']:.0f}%</growth_target>
-</client_profile>
+</client_profile>{intel_block}
 
 <task>
 Give me exactly 3 sharp talking points for this meeting.
 
 <talking_points>
-Format each as a numbered point. Be specific to their data. No generic advice.
+Format each as a numbered point. Be specific to their data. No generic advice.{enriched_note}
 </talking_points>
 
 Be direct. No fluff.
@@ -291,6 +317,52 @@ def print_prep(c, talking_points_text=""):
         for line in talking_points_text.split("\n"):
             print(f"  {line}")
     print("=" * width)
+
+# ── Email Intel ───────────────────────────────────────────────────────────────
+
+def fetch_email_intel(client_name):
+    """Silently fetch and parse email intelligence. Returns intel dict or None.
+
+    No terminal output beyond status lines — printing is the caller's job.
+    """
+    app_password = os.environ.get("GMAIL_APP_PASSWORD")
+    api_key      = os.environ.get("ANTHROPIC_API_KEY")
+
+    if not app_password:
+        print("\n  ⚠️   GMAIL_APP_PASSWORD not set — skipping email intelligence.")
+        print("       Add to ~/.zshrc: export GMAIL_APP_PASSWORD='your_app_password'")
+        return None
+    if not api_key:
+        print("\n  ⚠️   ANTHROPIC_API_KEY not set — skipping email intelligence.")
+        return None
+
+    days = prompt_lookback()
+    print(f"\n  📧  Fetching email intelligence for {client_name} (last {days} days)...")
+
+    try:
+        mail       = connect_gmail(app_password)
+        all_emails = fetch_recent_emails(mail, days=days)
+        mail.logout()
+    except SystemExit:
+        print("  ❌  Gmail connection failed — skipping email intelligence.")
+        return None
+
+    matched = match_emails(all_emails, client_name)
+    if not matched:
+        print(f"  ⚠️   No emails matched for '{client_name}' in the last {days} days.")
+        return None
+
+    threads = group_into_threads(matched)
+    print(f"  ✅  {len(matched)} emails · {len(threads)} thread(s) — sending to Claude...")
+
+    raw_output = email_intel_claude(build_extraction_prompt(client_name, threads), api_key)
+    if not raw_output:
+        print("  ❌  No response from Claude — skipping email intelligence.")
+        return None
+
+    print("  ✅  Email intelligence ready — enriching talking points")
+    return parse_intelligence(raw_output)
+
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 
@@ -349,11 +421,16 @@ answer = input("   Enter client name (or press Enter to skip): ").strip()
 if answer:
     client = find_client(answer, merged)
     if client:
-        print(f"\n  🤖  Generating talking points for {client['name']}...")
-        tp_prompt       = build_talking_points_prompt(client)
-        tp_raw          = call_claude(tp_prompt)
-        talking_points  = tp_raw if tp_raw else "Could not generate talking points."
+        # 1. Fetch email intel silently first — used to enrich the prompt
+        intel = fetch_email_intel(client["name"])
 
+        # 2. Build enriched talking points prompt and call Claude
+        print(f"\n  🤖  Generating talking points for {client['name']}...")
+        tp_prompt      = build_talking_points_prompt(client, intel=intel)
+        tp_raw         = call_claude(tp_prompt)
+        talking_points = tp_raw if tp_raw else "Could not generate talking points."
+
+        # 3. Print prep with enriched talking points
         print_prep(client, talking_points)
 
         # Parse into list for PDF
