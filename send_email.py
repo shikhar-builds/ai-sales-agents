@@ -16,7 +16,7 @@ from datetime import datetime
 # ── Config ────────────────────────────────────────────────────────────────────
 
 GMAIL_ADDRESS  = "shikhar.srivastava1601@gmail.com"      # ← your Gmail address
-APP_PASSWORD   = "qida aaev fsvb sulo"       # ← set your Gmail App Password here
+APP_PASSWORD   = os.environ.get("GMAIL_APP_PASSWORD", "")       # ← set your Gmail App Password here
 SEND_TO        = "shikhar.srivastava1601@gmail.com"      # ← who receives it (yourself for now)
 
 
