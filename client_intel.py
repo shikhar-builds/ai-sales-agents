@@ -180,6 +180,7 @@ def fetch_recent_emails(mail, days):
                 recipient   = decode_str(msg.get("To", ""))
                 subject     = decode_str(msg.get("Subject", ""))
                 date_header = msg.get("Date", "")
+                message_id  = msg.get("Message-ID", "").strip()
                 body        = get_body(msg)
 
                 try:
@@ -196,13 +197,14 @@ def fetch_recent_emails(mail, days):
                     sort_key = datetime.min.replace(tzinfo=timezone.utc)
 
                 emails.append({
-                    "id":        eid.decode(),
-                    "sender":    sender,
-                    "recipient": recipient,
-                    "subject":   subject,
-                    "date":      date_str,
-                    "sort_key":  sort_key,
-                    "body":      body[:MAX_BODY_CHARS],
+                    "id":         eid.decode(),
+                    "sender":     sender,
+                    "recipient":  recipient,
+                    "subject":    subject,
+                    "date":       date_str,
+                    "sort_key":   sort_key,
+                    "message_id": message_id,
+                    "body":       body[:MAX_BODY_CHARS],
                 })
 
         except Exception as e:
@@ -597,6 +599,10 @@ def _build_reply_msg(draft, most_recent):
     msg["From"]    = GMAIL_ADDRESS
     msg["To"]      = to_addr
     msg["Subject"] = subject
+    mid = most_recent.get("message_id", "")
+    if mid:
+        msg["In-Reply-To"] = mid
+        msg["References"]  = mid
     msg.attach(MIMEText(draft, "plain"))
     return msg, to_addr
 

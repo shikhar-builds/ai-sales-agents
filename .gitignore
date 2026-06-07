@@ -18,6 +18,9 @@ talking_points.txt
 # Credentials
 send_email.py
 
+# Logs
+briefing.log
+
 # Mac system files
 .DS_Store
 screenshots/.DS_Store
