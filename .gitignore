@@ -22,6 +22,7 @@ send_email.py
 .DS_Store
 screenshots/.DS_Store
 email_intel_*.md
+client_intel_*.md
 morning_summary_prompt.txt
 intel_*.txt
 digest_*.pdf
