@@ -586,6 +586,56 @@ def export_markdown(client, intel, draft, most_recent, thread_count, email_count
     print(f"\n  📄  Markdown saved: {filename}")
     return filename
 
+# ── Draft refinement + reply gate ────────────────────────────────────────────
+
+def build_refinement_prompt(current_draft, instruction):
+    return f"""You are a Senior Key Account Manager at a B2B payments company named Shikhar.
+
+Rewrite the email draft below based on the refinement instruction provided.
+Keep the same professional, concise, senior KAM voice.
+Sign off with exactly:
+
+Best,
+Shikhar
+Senior Key Account Manager | Worldline
+
+<refinement_instruction>{instruction}</refinement_instruction>
+
+<current_draft>{current_draft}</current_draft>
+
+Return only the revised email body — no subject line, no metadata, no explanation."""
+
+
+def reply_gate(draft, most_recent, api_key, app_password):
+    """Loop: show [y/n/r] gate. r → refine and loop. y/n → act and return."""
+    while True:
+        answer = input("\n  [y] Send  [n] Save to Drafts  [r] Refine: ").strip().lower()
+
+        if answer == "y":
+            send_reply(draft, most_recent, app_password)
+            return draft
+
+        if answer == "n":
+            save_to_drafts(draft, most_recent, app_password)
+            return draft
+
+        if answer == "r":
+            instruction = input("  How should I refine this? ").strip()
+            if not instruction:
+                print("  ⚠️  No instruction given — try again.")
+                continue
+            print(f"  🤖  Refining via Claude ({CLAUDE_MODEL})...")
+            refined = call_claude(build_refinement_prompt(draft, instruction), api_key, max_tokens=800)
+            if refined:
+                draft = refined
+                print("  ✅ Refined draft ready")
+                print_draft_reply(draft, most_recent)
+            else:
+                print("  ❌ Refinement failed — keeping current draft.")
+        else:
+            print("  ⚠️  Enter y, n, or r.")
+
+
 # ── SMTP sender + IMAP Drafts ─────────────────────────────────────────────────
 
 def _build_reply_msg(draft, most_recent):
@@ -716,12 +766,7 @@ def main():
         if draft:
             print("  ✅ Draft ready")
             print_draft_reply(draft, most_recent)
-
-            answer = input("\n  Send this reply? [y/n]: ").strip().lower()
-            if answer == "y":
-                send_reply(draft, most_recent, app_password)
-            else:
-                save_to_drafts(draft, most_recent, app_password)
+            draft = reply_gate(draft, most_recent, api_key, app_password)
         else:
             print("  ⚠️  Draft generation failed — skipping.")
 
